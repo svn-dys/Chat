@@ -11,8 +11,8 @@ import core.ServerConfig;
 
 public final class ChatServer {
     private final Logging logger = Logging.serverLogger();
-    private ServerConfig config = new ServerConfig(InetAddress.getLoopbackAddress(), 1337, 50, true);
-    private ArrayList<ChatClient> clients = new ArrayList<>(); // ArrayList of ChatClient clientHandlers
+    private final ServerConfig config = new ServerConfig(InetAddress.getLoopbackAddress(), 1337, 50, true);
+    private final ArrayList<ChatClient> clients = new ArrayList<>(); // ArrayList of ChatClient clientHandlers
     private ServerSocket serverSocket;
 
     public ChatServer() {
