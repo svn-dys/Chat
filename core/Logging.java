@@ -1,14 +1,16 @@
 package core;
 
-import java.time.LocalDateTime;
-
-// Logging class for logging messages to the console.
 public class Logging {
     private final Context context;
 
-    // The context of the object from which the message was logged.
+    // BLUE = INFO,
+    // RED = ERROR
+    private static final String RESET = "\u001B[0m";
+    private static final String RED = "\u001B[31m";
+    private static final String BLUE = "\u001B[34m";
+
     private enum Context {
-        SERVER, CLIENT, UI
+        SERVER, UI
     }
 
     private Logging(Context context) {
@@ -22,23 +24,23 @@ public class Logging {
         return new Logging(Context.SERVER);
     }
 
-    public static Logging clientLogger() {
-        return new Logging(Context.CLIENT);
-    }
-
-    public static Logging guiLogger() {
+    public static Logging uiLogger() {
         return new Logging(Context.UI);
     }
 
-    private void log(String message) {
-        System.out.println("[" + LocalDateTime.now() + "][" + context + "]" + message);
+    private void log(String level, String message, String color) {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        StackTraceElement caller = stackTrace[3];
+        String location = caller.getFileName() + ":" + caller.getLineNumber();
+
+        System.out.println(color + "[" + location + "][" + context + "]" + level + message + RESET);
     }
 
     public void error(String message) {
-        log("[ERROR]: " + message);
+        log("[ERROR]: ", message, RED);
     }
 
     public void info(String message) {
-        log("[INFO]: " + message);
+        log("[INFO]: ", message, BLUE);
     }
 }
