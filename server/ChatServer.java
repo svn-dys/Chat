@@ -61,9 +61,9 @@ public final class ChatServer implements Runnable {
     }
 
     void sendPrivate(String toName, String msg) {
-        clients.keySet().forEach(ch -> {
-            if (ch.getClient().getName().equalsIgnoreCase(toName)) {
-                ch.send(msg);                // deliver to the one match
+        clients.keySet().forEach(clientHandler -> {
+            if (clientHandler.getClient().getName().equalsIgnoreCase(toName)) {
+                clientHandler.send(msg);
             }
         });
     }

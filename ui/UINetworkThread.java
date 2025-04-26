@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 public class UINetworkThread implements Runnable {
     private final static Logging logger = Logging.uiLogger();
     private final static ServerConfig config = ServerConfigProvider.get();
-    private Consumer<String> chatBoxCallback; // maybe turn into an array of callbacks to make this function more generic?
+    private Consumer<String> chatBoxCallback;
     private PrintWriter writer;
 
     protected void registerChatBoxListener(Consumer<String> chatBoxCallback) {
@@ -43,10 +43,10 @@ public class UINetworkThread implements Runnable {
     protected void sendPrivateMessage(String recipient, String msg) {
         if (msg == null || msg.isBlank() && chatBoxCallback != null) return;
 
-        // If *you* sent the message, then display (You) in the chat instead of your name. e.g. (You):
-        SwingUtilities.invokeLater(() -> chatBoxCallback.accept("(Private Message to: " + recipient + ") " + msg));
+        // If *you* sent the message, then display (You) in the chat instead of your name. E.g. (You):
+        SwingUtilities.invokeLater(() -> chatBoxCallback.accept("(private message to: " + recipient + ") " + msg));
 
-        writer.println("PM:" + recipient + ":" + msg);   // over the wire
+        writer.println("PM:" + recipient + ":" + msg);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class UINetworkThread implements Runnable {
                 // invoke its callback.
                 SwingUtilities.invokeLater(() -> {
                     if (chatBoxCallback != null) {
-                        chatBoxCallback.accept(msg); // coupled
+                        chatBoxCallback.accept(msg);
                     }
                 });
             }
