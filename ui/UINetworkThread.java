@@ -1,4 +1,4 @@
-// Threaded class that orchestrates the connection and messages
+// This class that orchestrates the connection and messages
 // between the UI and the server. This thread is owned by ChatWindow.
 package ui;
 
@@ -15,25 +15,43 @@ import java.net.Socket;
 import java.util.function.Consumer;
 
 public class UINetworkThread implements Runnable {
-    private final Logging logger = Logging.uiLogger();
+    private final static Logging logger = Logging.uiLogger();
     private final static ServerConfig config = ServerConfigProvider.get();
-    private final Consumer<String> messageToWindowCallback;
+    private Consumer<String> chatBoxCallback; // maybe turn into an array of callbacks to make this function more generic?
     private PrintWriter writer;
 
-    public UINetworkThread(Consumer<String> messageToWindowCallback) {
-        this.messageToWindowCallback = messageToWindowCallback;
+    protected void registerChatBoxListener(Consumer<String> chatBoxCallback) {
+        this.chatBoxCallback = chatBoxCallback;
     }
 
-    public void sendMessageToServer(String msg) {
+    protected void setThisUserName(String username) {
+        writer.println("SET_USERNAME:" + username);
+    }
+
+    protected void sendMessageToServer(String msg) {
+        if (msg == null || msg.isBlank() && chatBoxCallback != null) return;
+
+        // If *you* sent the message, then display (You) in the chat instead of your name. e.g. (You):
+        SwingUtilities.invokeLater(() -> chatBoxCallback.accept("(You): " + msg));
+
         // Write to this socket's output stream. The server will handle this in
-        // the ClientHandler thread "ClientHandler.run()" method.
-        writer.println(msg);
+        // the ClientHandler thread "ClientHandler.run()" method. Finally, the this.run() will
+        // execute the consumer callback, `messageToWindowCallback`, and null out the callback.
+        writer.println("MSG:" + msg);
+    }
+
+    protected void sendPrivateMessage(String recipient, String msg) {
+        if (msg == null || msg.isBlank() && chatBoxCallback != null) return;
+
+        // If *you* sent the message, then display (You) in the chat instead of your name. e.g. (You):
+        SwingUtilities.invokeLater(() -> chatBoxCallback.accept("(Private Message to: " + recipient + ") " + msg));
+
+        writer.println("PM:" + recipient + ":" + msg);   // over the wire
     }
 
     @Override
     public void run() {
-        try {
-            Socket socket = new Socket(config.inetAddress(), config.port());
+        try (Socket socket = new Socket(config.inetAddress(), config.port())) {
             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.writer = writer;
@@ -41,11 +59,15 @@ public class UINetworkThread implements Runnable {
             String messageFromServer;
             while ((messageFromServer = reader.readLine()) != null) {
                 String msg = messageFromServer;
-                logger.info("Received message from server: " + msg);
+                logger.info(this + "Received message from server: " + msg);
 
-                // Pass the msg from the server to the callback and
-                // dispatch the execution of the callback on the JFrame EDT thread.
-                SwingUtilities.invokeLater(() -> messageToWindowCallback.accept(msg));
+                // If there is a chatbox listening for messages from the server,
+                // invoke its callback.
+                SwingUtilities.invokeLater(() -> {
+                    if (chatBoxCallback != null) {
+                        chatBoxCallback.accept(msg); // coupled
+                    }
+                });
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -1,5 +1,4 @@
 // This class represents the UI. Its responsibility is to display data received from its chatNetWorkThread.
-
 package ui;
 
 import core.Logging;
@@ -9,60 +8,79 @@ import core.ServerConfigProvider;
 import java.awt.*;
 
 public class ChatWindow extends JFrame {
-    private final Logging logger = Logging.uiLogger();
-    private final ServerConfig config = ServerConfigProvider.get();
+    private final static Logging logger = Logging.uiLogger();
+    private final static ServerConfig config = ServerConfigProvider.get();
+    private final UINetworkThread UINetworkThread;
     private static final int WINDOW_WIDTH = 400;
     private static final int WINDOW_HEIGHT = 600;
     private final JTextArea area = new JTextArea();
     private final JTextField input = new JTextField();
-    private final UINetworkThread UINetworkThread;
+    private JFrame window;
+    private String userName;
 
-    private Thread chatNetworkThread;
 
     public ChatWindow() {
-        // super("Chat");
-        logger.info("Initializing ChatWindow...");
-        //InitChatWindow();
+        super("Chat Window");
+        this.UINetworkThread = new UINetworkThread();
+        Thread uiNetworkThreadThread = new Thread(UINetworkThread, "ui-network-thread");
+        uiNetworkThreadThread.start();
 
-        JFrame window = new JFrame("Chat");
-        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        setSize(600,400);
-        setLayout(new BorderLayout());
-        window.setVisible(true);
-
-        // Area code for test
-        area.setEditable(false);
-        window.add(new JScrollPane(area), BorderLayout.CENTER);
-        area.setVisible(true);
-        window.add(input, BorderLayout.SOUTH);
-
-        // TODO: Figure out why moving this to the top of the constructor causes the socket to fail to connect.
-        // Create and start the network thread for this window.
-        UINetworkThread = new UINetworkThread(this::messageToWindowCallback);
-        new Thread(UINetworkThread).start();
-
-        // Must come after the network thread is started.
-        input.addActionListener(e -> {
-            sendInputToServer();
-        });
+        setUserNameInChat();
+        InitChatWindow();
     }
 
-    // Send the input to the server. E.g., the user presses the enter button in the input field.
-    private void sendInputToServer() {
-        String inputText = input.getText();
-        if (inputText.isBlank()) return;
+    private void setUserNameInChat() {
+        userName = JOptionPane.showInputDialog(this, "Enter a user name:");
+        if (userName.length() > 16) {
+            JOptionPane.showMessageDialog(this, "User name must be less than 16 characters.");
+            setUserNameInChat();
+            return;
+        }
 
-        UINetworkThread.sendMessageToServer(inputText);
-        input.setText("");
-    }
-
-    public void messageToWindowCallback(String message) {
-        logger.info("Frame: " + message);
-        area.append(message + "\n");
+        UINetworkThread.setThisUserName(userName.isEmpty() ? "Anonymous" : userName);
     }
 
     private void InitChatWindow() {
+        window = new JFrame("Chat");
+        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        window.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        setSize(600,500);
+        setLayout(new BorderLayout());
+        window.setVisible(true);
 
+        // Input
+        window.add(input, BorderLayout.SOUTH);
+        input.grabFocus();
+
+        // ChatBox
+        createChatBox();
+
+        input.addActionListener(e -> {
+            String text = input.getText().trim();
+            input.setText("");
+
+            // type: /pm Bob Hello Bob!
+            if (text.startsWith("/w ") || text.startsWith("/pm ") || text.startsWith("/whisper ")) {
+                String[] p = text.split("\\s+", 3); // [/pm, Bob, rest]
+                if (p.length == 3) {
+                    UINetworkThread.sendPrivateMessage(p[1], p[2]);
+                } else {
+                    area.append("(System) Usage: /w OR /pm OR /whisper <user> <message>\n");
+                }
+            } else {
+                UINetworkThread.sendMessageToServer(text);
+            }
+        });
+    }
+
+    // A chat window that listens for messages. It then appends the messages to the ChatWindow.
+    private void createChatBox() {
+        UINetworkThread.registerChatBoxListener(this::chatBoxMessageReceived);
+        area.setEditable(false);
+        window.add(new JScrollPane(area), BorderLayout.CENTER);
+    }
+
+    private void chatBoxMessageReceived(String message) {
+        area.append(message + "\n");
     }
 }

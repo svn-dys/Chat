@@ -1,7 +1,10 @@
-// Handles a single client (user) to the ChatServer.
+// This class, the client handler, acts as the Server's listener for messages
+// from the UI ChatWindow AND also sends messages to the UI ChatWindow.
+// A client represents a single open ChatWindow (see ui/ChatWindow for the ChatWindow implementation).
 package server;
 
 import core.Logging;
+import server.Client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,6 +17,7 @@ public class ClientHandler implements Runnable {
     private final Socket socket;
     private final ChatServer server;
     private final PrintWriter writer;
+    private final Client client;
 
     ClientHandler(Socket socket,
                   ChatServer server) throws IOException {
@@ -23,11 +27,11 @@ public class ClientHandler implements Runnable {
         this.socket = socket;
         this.server = server;
         this.writer = new PrintWriter(socket.getOutputStream(), true);
+        this.client  = new Client("Anonymous", this);
     }
 
     public void send(String msg) {
         // Write to the output stream for `this` client
-        logger.info("Sending message to UI network listeners: " + msg);
         writer.println(msg);
     }
 
@@ -35,13 +39,44 @@ public class ClientHandler implements Runnable {
     public void run() {
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(socket.getInputStream()))) {
-            // In reality, this message should be from the UI network thread
             String messageFromClient;
             while ((messageFromClient = reader.readLine()) != null) {
-                server.notifyClientListenersOfMessage(messageFromClient);
+                // Command SET_USERNAME:
+                if (messageFromClient.startsWith("SET_USERNAME:")) {
+                    String newName = messageFromClient.substring("SET_USERNAME:".length());
+                    client.setName(newName);
+                    logger.info("User with IP" + socket.getInetAddress() + ":" +
+                            socket.getPort() + " named themselves " + newName + ".");
+                    continue;
+                }
+
+                // Command WHISPER:
+                if (messageFromClient.startsWith("PM:")) {
+                    String[] p = messageFromClient.split(":", 3); // [PM, Bob, text]
+                    if (p.length == 3) {
+                        String to   = p[1];
+                        String text = p[2];
+                        server.sendPrivate(to, client.getName() + " (private): " + text);
+                    }
+                    continue;
+                }
+
+                // Public Chat
+                if (messageFromClient.startsWith("MSG:")) {
+                    String chat = messageFromClient.substring("MSG:".length());
+                    server.broadcast(client.getName() + ": " + chat, this); // exclude this client
+                    continue;
+                }
+
+                // This can actually happen if someone connects to the server via telnet:
+                // or similar protocols
+                logger.error("Received invalid message from a client: " + messageFromClient);
             }
         } catch(IOException e) {
             throw new RuntimeException(e);
         }
     }
+
+    // Getters
+    Client getClient() { return client; }
 }

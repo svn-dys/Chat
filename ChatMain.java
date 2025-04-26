@@ -11,14 +11,17 @@ public class ChatMain {
         ServerConfigProvider.initialize(new ServerConfig(
                 InetAddress.getLoopbackAddress(), 1337, 50, true));
 
+        // Start a Server thread.
         ChatServer server = new ChatServer();
         Thread chatServerThread = new Thread(server, "chat-server-thread");
         chatServerThread.setDaemon(true);
         chatServerThread.start();
 
+        // Create as many chat windows as you wish for testing.
         SwingUtilities.invokeLater(() -> {
             new ChatWindow();
             new ChatWindow();
+            // e.g. new ChatWindow();
         });
     }
 }

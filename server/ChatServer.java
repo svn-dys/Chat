@@ -13,7 +13,7 @@ import core.ServerConfig;
 import core.ServerConfigProvider;
 
 public final class ChatServer implements Runnable {
-    private final Logging logger = Logging.serverLogger();
+    private static final Logging logger = Logging.serverLogger();
     private final Map<ClientHandler, String> clients = new HashMap<>();
     private final ServerConfig config = ServerConfigProvider.get();
     private ServerSocket serverSocket;
@@ -29,16 +29,13 @@ public final class ChatServer implements Runnable {
 
     private void startServerInstance() {
         try {
-            logger.info("Server is running on IP: " + config.inetAddress());
-            logger.info("Server is running on port: " + config.port());
-
             serverSocket = new ServerSocket(config.port(), config.backlog(), config.inetAddress());
             while (true) {
                 // Wait for a new client to connect
                 Socket clientSocket = serverSocket.accept();
                 ClientHandler clientHandler = new ClientHandler(clientSocket, this);
+                clients.put(clientHandler, "Anonymous");
                 new Thread(clientHandler).start();
-                clients.put(clientHandler, "Test");
             }
         } catch (Exception e) {
             logger.error("Failed to start server: " + e.getMessage());
@@ -56,13 +53,19 @@ public final class ChatServer implements Runnable {
         }
     }
 
-    // Broadcasts a message to clients who are connected to the server.
-    void notifyClientListenersOfMessage(String msg) {
-        if (msg.isBlank()) return;
+    // Sends a message to all clients on the server except for excluded, `exclude`, ChildHandler
+    void broadcast(String msg, ClientHandler exclude) {
+        clients.keySet().forEach(clientHandler -> {
+            if (clientHandler != exclude) clientHandler.send(msg);
+        });
+    }
 
-        for(ClientHandler client : clients.keySet()) {
-            client.send(msg);
-        }
+    void sendPrivate(String toName, String msg) {
+        clients.keySet().forEach(ch -> {
+            if (ch.getClient().getName().equalsIgnoreCase(toName)) {
+                ch.send(msg);                // deliver to the one match
+            }
+        });
     }
 
     // Getters
