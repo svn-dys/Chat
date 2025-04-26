@@ -55,7 +55,7 @@ public class ClientHandler implements Runnable {
                     if (p.length == 3) {
                         String to   = p[1];
                         String text = p[2];
-                        server.sendPrivate(to, client.getName() + " (private): " + text);
+                        server.broadcastMessagePrivate(to, client.getName() + " (private): " + text);
                     }
                     continue;
                 }
@@ -63,7 +63,7 @@ public class ClientHandler implements Runnable {
                 // Public Chat
                 if (messageFromClient.startsWith("MSG:")) {
                     String chat = messageFromClient.substring("MSG:".length());
-                    server.broadcast(client.getName() + ": " + chat, this); // exclude this client
+                    server.broadcastMessage(client.getName() + ": " + chat, this); // exclude this client
                     continue;
                 }
 

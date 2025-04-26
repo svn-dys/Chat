@@ -53,13 +53,13 @@ public final class ChatServer implements Runnable {
     }
 
     // Sends a message to all clients on the server except for excluded, `exclude`, ChildHandler
-    void broadcast(String msg, ClientHandler exclude) {
+    void broadcastMessage(String msg, ClientHandler exclude) {
         clients.keySet().forEach(clientHandler -> {
             if (clientHandler != exclude) clientHandler.send(msg);
         });
     }
 
-    void sendPrivate(String toName, String msg) {
+    void broadcastMessagePrivate(String toName, String msg) {
         clients.keySet().forEach(clientHandler -> {
             if (clientHandler.getClient().getName().equalsIgnoreCase(toName)) {
                 clientHandler.send(msg);
