@@ -4,7 +4,6 @@
 package server;
 
 import core.Logging;
-import server.Client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,7 +12,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class ClientHandler implements Runnable {
-    private final Logging logger = Logging.serverLogger();
+    private static final Logging LOG = Logging.serverLogger();
     private final Socket socket;
     private final ChatServer server;
     private final PrintWriter writer;
@@ -21,7 +20,7 @@ public class ClientHandler implements Runnable {
 
     ClientHandler(Socket socket,
                   ChatServer server) throws IOException {
-        logger.info("A client connected to server IP: " +
+        LOG.INFO("A client connected to server IP: " +
                 server.getInetAddress() + ":" + server.getPort() + " from client IP: " +
                 socket.getInetAddress() + ":" + socket.getPort() + ".");
         this.socket = socket;
@@ -45,7 +44,7 @@ public class ClientHandler implements Runnable {
                 if (messageFromClient.startsWith("SET_USERNAME:")) {
                     String newName = messageFromClient.substring("SET_USERNAME:".length());
                     client.setName(newName);
-                    logger.info("User with IP" + socket.getInetAddress() + ":" +
+                    LOG.INFO("User with IP" + socket.getInetAddress() + ":" +
                             socket.getPort() + " named themselves " + newName + ".");
                     continue;
                 }
@@ -70,7 +69,7 @@ public class ClientHandler implements Runnable {
 
                 // This can actually happen if someone connects to the server via telnet:
                 // or similar protocols
-                logger.error("Received invalid message from a client: " + messageFromClient);
+                LOG.ERROR("Received invalid message from a client: " + messageFromClient);
             }
         } catch(IOException e) {
             throw new RuntimeException(e);

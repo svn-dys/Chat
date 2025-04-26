@@ -8,7 +8,7 @@ package core;
     through its associated UI network sockets.
 */
 public final class ServerConfigProvider {
-    private static final Logging logger = Logging.serverLogger();
+    private static final Logging LOG = Logging.serverLogger();
     private static ServerConfig instance;
 
     public static void initialize(ServerConfig config) {
@@ -20,7 +20,7 @@ public final class ServerConfigProvider {
     }
 
     static void logCurrentConfig() {
-        logger.info("Current Server Config: " + instance);
+        LOG.INFO("Current Server Config: " + instance);
     }
 
     public static ServerConfig get() {

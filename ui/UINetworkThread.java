@@ -15,7 +15,7 @@ import java.net.Socket;
 import java.util.function.Consumer;
 
 public class UINetworkThread implements Runnable {
-    private final static Logging logger = Logging.uiLogger();
+    private final static Logging LOG = Logging.uiLogger();
     private final static ServerConfig config = ServerConfigProvider.get();
     private Consumer<String> chatBoxCallback;
     private PrintWriter writer;
@@ -59,8 +59,6 @@ public class UINetworkThread implements Runnable {
             String messageFromServer;
             while ((messageFromServer = reader.readLine()) != null) {
                 String msg = messageFromServer;
-                logger.info(this + "Received message from server: " + msg);
-
                 // If there is a chatbox listening for messages from the server,
                 // invoke its callback.
                 SwingUtilities.invokeLater(() -> {

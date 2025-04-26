@@ -8,7 +8,7 @@ import core.ServerConfigProvider;
 import java.awt.*;
 
 public class ChatWindow extends JFrame {
-    private final static Logging logger = Logging.uiLogger();
+    private final static Logging LOG = Logging.uiLogger();
     private final static ServerConfig config = ServerConfigProvider.get();
     private final UINetworkThread UINetworkThread;
     private static final int WINDOW_WIDTH = 400;
@@ -16,7 +16,6 @@ public class ChatWindow extends JFrame {
     private final JTextArea area = new JTextArea();
     private final JTextField input = new JTextField();
     private JFrame window;
-    private String userName;
 
 
     public ChatWindow() {
@@ -30,7 +29,7 @@ public class ChatWindow extends JFrame {
     }
 
     private void setUserNameInChat() {
-        userName = JOptionPane.showInputDialog(this, "Enter a user name:");
+        String userName = JOptionPane.showInputDialog(this, "Enter a user name:");
         if (userName.length() > 16) {
             JOptionPane.showMessageDialog(this, "User name must be less than 16 characters.");
             setUserNameInChat();
@@ -44,6 +43,7 @@ public class ChatWindow extends JFrame {
         window = new JFrame("Chat");
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        window.setResizable(false);
         setSize(600,500);
         setLayout(new BorderLayout());
         window.setVisible(true);

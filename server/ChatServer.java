@@ -13,13 +13,13 @@ import core.ServerConfig;
 import core.ServerConfigProvider;
 
 public final class ChatServer implements Runnable {
-    private static final Logging logger = Logging.serverLogger();
+    private static final Logging LOG = Logging.serverLogger();
     private final Map<ClientHandler, String> clients = new HashMap<>();
     private final ServerConfig config = ServerConfigProvider.get();
     private ServerSocket serverSocket;
 
     public ChatServer() {
-        logger.info("Starting Server...");
+        LOG.INFO("Starting Server...");
     }
 
     @Override
@@ -38,17 +38,16 @@ public final class ChatServer implements Runnable {
                 new Thread(clientHandler).start();
             }
         } catch (Exception e) {
-            logger.error("Failed to start server: " + e.getMessage());
+            LOG.ERROR("Failed to start server: " + e.getMessage());
             throw new RuntimeException(e);
         } finally {
-            // TODO: better error handling here
             try {
                 if (serverSocket != null && !serverSocket.isClosed()) {
                     serverSocket.close();
-                    logger.info("Server has been closed.");
+                    LOG.INFO("Server has been closed.");
                 }
             } catch (IOException e) {
-                logger.error("Failed to close server socket: " + e.getMessage());
+                LOG.ERROR("Failed to close server socket: " + e.getMessage());
             }
         }
     }

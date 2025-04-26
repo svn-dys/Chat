@@ -2,8 +2,6 @@
 
 package server;
 
-import java.util.UUID;
-
 public class Client {
     private String name;
     private final ClientHandler handler;

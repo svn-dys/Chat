@@ -28,7 +28,7 @@ public class Logging {
         return new Logging(Context.UI);
     }
 
-    private void log(String level, String message, String color) {
+    private void LOG(String level, String message, String color) {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         StackTraceElement caller = stackTrace[3];
         String location = caller.getFileName() + ":" + caller.getLineNumber();
@@ -36,11 +36,11 @@ public class Logging {
         System.out.println(color + "[" + location + "][" + context + "]" + level + message + RESET);
     }
 
-    public void error(String message) {
-        log("[ERROR]: ", message, RED);
+    public void ERROR(String message) {
+        LOG("[ERROR]: ", message, RED);
     }
 
-    public void info(String message) {
-        log("[INFO]: ", message, BLUE);
+    public void INFO(String message) {
+        LOG("[INFO]: ", message, BLUE);
     }
 }
