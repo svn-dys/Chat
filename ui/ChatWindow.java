@@ -71,7 +71,7 @@ public class ChatWindow extends JFrame {
         });
     }
 
-    // A chat window that listens for messages. It then appends the messages to the ChatWindow.
+    // A chat box that listens for messages. It then appends the messages to the ChatBox.
     private void createChatBox() {
         UINetworkThread.registerChatBoxListener(this::chatBoxMessageReceived);
         area.setEditable(false);
