@@ -1,6 +1,6 @@
 package core;
 
-public class Logging {
+public final class Logging {
     private final Context context;
 
     // BLUE = INFO,
