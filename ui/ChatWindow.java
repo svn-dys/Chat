@@ -28,6 +28,7 @@ public class ChatWindow extends JFrame {
 
     private void setUserNameInChat() {
         String userName = JOptionPane.showInputDialog(this, "Enter a user name (16 characters max):");
+        // TODO: Nullptr exception if user presses "cancel"
         if (userName.length() > 16) {
             JOptionPane.showMessageDialog(this, "User name must be less than 16 characters.");
             setUserNameInChat();
@@ -59,11 +60,11 @@ public class ChatWindow extends JFrame {
 
             // Check if the user is sending a PM or sending a global message.
             if (text.startsWith("/w ") || text.startsWith("/pm ") || text.startsWith("/whisper ")) {
-                String[] p = text.split("\\s+", 3); // [/pm, Bob, rest]
+                String[] p = text.split("\\s+", 3); // [/pm Bob rest]
                 if (p.length == 3) {
                     UINetworkThread.sendPrivateMessage(p[1], p[2]);
                 } else {
-                    area.append("(System) Usage: /w OR /pm OR /whisper <user> <message>\n");
+                    area.append("(System) To send a PM use: /w OR /pm OR /whisper <user> <message>\n");
                 }
             } else {
                 UINetworkThread.sendMessageToServer(text);
