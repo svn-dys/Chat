@@ -77,7 +77,7 @@ public class ClientHandler implements Runnable {
     }
 
     // Getters
-    Client getClient() {
+    public Client getClient() {
         return client;
     }
 }

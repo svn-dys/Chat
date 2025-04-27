@@ -54,7 +54,7 @@ public final class ChatServer implements Runnable {
     }
 
     // Sends a message to all clients on the server except for excluded, `exclude`, ChildHandler
-    void broadcastMessage(String msg, ClientHandler exclude) {
+    public void broadcastMessage(String msg, ClientHandler exclude) {
         clients.keySet().forEach(clientHandler -> {
             if (clientHandler != exclude) {
                 clientHandler.send(msg);
@@ -62,7 +62,7 @@ public final class ChatServer implements Runnable {
         });
     }
 
-    void broadcastMessagePrivate(String toName, String msg) {
+    public void broadcastMessagePrivate(String toName, String msg) {
         clients.keySet().forEach(clientHandler -> {
             if (clientHandler.getClient().getName().equalsIgnoreCase(toName)) {
                 clientHandler.send(msg);
@@ -71,11 +71,11 @@ public final class ChatServer implements Runnable {
     }
 
     // Getters
-    InetAddress getInetAddress() {
+    public InetAddress getInetAddress() {
         return config.inetAddress();
     }
 
-    int getPort() {
+    public int getPort() {
         return config.port();
     }
 }

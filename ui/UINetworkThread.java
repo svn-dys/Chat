@@ -19,15 +19,15 @@ public class UINetworkThread implements Runnable {
     private Consumer<String> chatBoxCallback;
     private PrintWriter writer;
 
-    protected void registerChatBoxListener(Consumer<String> chatBoxCallback) {
+    public void registerChatBoxListener(Consumer<String> chatBoxCallback) {
         this.chatBoxCallback = chatBoxCallback;
     }
 
-    protected void setThisUserName(String username) {
+    public void setThisUserName(String username) {
         writer.println("SET_USERNAME:" + username);
     }
 
-    protected void sendMessageToServer(String msg) {
+    public void sendMessageToServer(String msg) {
         if (msg == null || msg.isBlank() && chatBoxCallback != null) return;
 
         // If *you* sent the message, then display (You) in the chat instead of your name. e.g. (You):
@@ -39,7 +39,7 @@ public class UINetworkThread implements Runnable {
         writer.println("MSG:" + msg);
     }
 
-    protected void sendPrivateMessage(String recipient, String msg) {
+    public void sendPrivateMessage(String recipient, String msg) {
         if (msg == null || msg.isBlank() && chatBoxCallback != null) return;
 
         // If *you* sent the message, then display (You) in the chat instead of your name. E.g. (You):
