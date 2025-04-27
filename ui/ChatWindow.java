@@ -3,13 +3,10 @@ package ui;
 
 import core.Logging;
 import javax.swing.*;
-import core.ServerConfig;
-import core.ServerConfigProvider;
 import java.awt.*;
 
 public class ChatWindow extends JFrame {
     private final static Logging LOG = Logging.uiLogger();
-    private final static ServerConfig config = ServerConfigProvider.get();
     private final UINetworkThread UINetworkThread;
     private static final int WINDOW_WIDTH = 400;
     private static final int WINDOW_HEIGHT = 600;
@@ -17,19 +14,19 @@ public class ChatWindow extends JFrame {
     private final JTextField input = new JTextField();
     private JFrame window;
 
-
     public ChatWindow() {
-        super("Chat Window");
+        super("Chat Window | Made by Sven Dysthe @ NSCC");
+        LOG.INFO("Starting a ChatWindow...");
         this.UINetworkThread = new UINetworkThread();
         Thread uiNetworkThreadThread = new Thread(UINetworkThread, "ui-network-thread");
         uiNetworkThreadThread.start();
 
         setUserNameInChat();
-        InitChatWindow();
+        initChatWindow();
     }
 
     private void setUserNameInChat() {
-        String userName = JOptionPane.showInputDialog(this, "Enter a user name:");
+        String userName = JOptionPane.showInputDialog(this, "Enter a user name (16 characters max):");
         if (userName.length() > 16) {
             JOptionPane.showMessageDialog(this, "User name must be less than 16 characters.");
             setUserNameInChat();
@@ -39,27 +36,27 @@ public class ChatWindow extends JFrame {
         UINetworkThread.setThisUserName(userName.isEmpty() ? "Anonymous" : userName);
     }
 
-    private void InitChatWindow() {
+    private void initChatWindow() {
         window = new JFrame("Chat");
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         window.setResizable(false);
+        window.setVisible(true);
         setSize(600,500);
         setLayout(new BorderLayout());
-        window.setVisible(true);
 
-        // Input
+        // Input.
         window.add(input, BorderLayout.SOUTH);
         input.grabFocus();
 
-        // ChatBox
+        // ChatBox.
         createChatBox();
 
         input.addActionListener(e -> {
             String text = input.getText().trim();
             input.setText("");
 
-            // type: /pm Bob Hello Bob!
+            // Check if the user is sending a PM or sending a global message.
             if (text.startsWith("/w ") || text.startsWith("/pm ") || text.startsWith("/whisper ")) {
                 String[] p = text.split("\\s+", 3); // [/pm, Bob, rest]
                 if (p.length == 3) {

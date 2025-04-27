@@ -15,7 +15,6 @@ import java.net.Socket;
 import java.util.function.Consumer;
 
 public class UINetworkThread implements Runnable {
-    private final static Logging LOG = Logging.uiLogger();
     private final static ServerConfig config = ServerConfigProvider.get();
     private Consumer<String> chatBoxCallback;
     private PrintWriter writer;

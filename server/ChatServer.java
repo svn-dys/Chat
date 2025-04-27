@@ -24,18 +24,19 @@ public final class ChatServer implements Runnable {
 
     @Override
     public void run() {
-        startServerInstance();
-    }
-
-    private void startServerInstance() {
         try {
             serverSocket = new ServerSocket(config.port(), config.backlog(), config.inetAddress());
             while (true) {
-                // Wait for a new client to connect
-                Socket clientSocket = serverSocket.accept();
-                ClientHandler clientHandler = new ClientHandler(clientSocket, this);
-                clients.put(clientHandler, "Anonymous");
-                new Thread(clientHandler).start();
+                try {
+                    // Wait for a new client to connect
+                    Socket clientSocket = serverSocket.accept();
+                    ClientHandler clientHandler = new ClientHandler(clientSocket, this);
+                    clients.put(clientHandler, "Anonymous");
+                    new Thread(clientHandler).start();
+                } catch (IOException e) {
+                    LOG.ERROR("Failed to accept client connection: " + e.getMessage());
+                    return;
+                }
             }
         } catch (Exception e) {
             LOG.ERROR("Failed to start server: " + e.getMessage());
@@ -55,7 +56,9 @@ public final class ChatServer implements Runnable {
     // Sends a message to all clients on the server except for excluded, `exclude`, ChildHandler
     void broadcastMessage(String msg, ClientHandler exclude) {
         clients.keySet().forEach(clientHandler -> {
-            if (clientHandler != exclude) clientHandler.send(msg);
+            if (clientHandler != exclude) {
+                clientHandler.send(msg);
+            }
         });
     }
 

@@ -40,7 +40,7 @@ public class ClientHandler implements Runnable {
                 new InputStreamReader(socket.getInputStream()))) {
             String messageFromClient;
             while ((messageFromClient = reader.readLine()) != null) {
-                // Command SET_USERNAME:
+                // Command "SET_USERNAME" Sets the userName of this client:
                 if (messageFromClient.startsWith("SET_USERNAME:")) {
                     String newName = messageFromClient.substring("SET_USERNAME:".length());
                     client.setName(newName);
@@ -49,7 +49,7 @@ public class ClientHandler implements Runnable {
                     continue;
                 }
 
-                // Command WHISPER:
+                // Command "PM" Private Message:
                 if (messageFromClient.startsWith("PM:")) {
                     String[] p = messageFromClient.split(":", 3); // [PM, Bob, text]
                     if (p.length == 3) {
@@ -60,7 +60,7 @@ public class ClientHandler implements Runnable {
                     continue;
                 }
 
-                // Public Chat
+                // Command "MSG" Normal Global Message:
                 if (messageFromClient.startsWith("MSG:")) {
                     String chat = messageFromClient.substring("MSG:".length());
                     server.broadcastMessage(client.getName() + ": " + chat, this); // exclude this client
@@ -77,5 +77,7 @@ public class ClientHandler implements Runnable {
     }
 
     // Getters
-    Client getClient() { return client; }
+    Client getClient() {
+        return client;
+    }
 }

@@ -8,8 +8,9 @@ import java.net.InetAddress;
 
 public class ChatMain {
     public static void main(String[] args) {
+        // Global server config
         ServerConfigProvider.initialize(new ServerConfig(
-                InetAddress.getLoopbackAddress(), 1337, 50, true));
+                InetAddress.getLoopbackAddress(), 1337, 50));
 
         // Start a Server thread.
         ChatServer server = new ChatServer();
@@ -17,11 +18,10 @@ public class ChatMain {
         chatServerThread.setDaemon(true);
         chatServerThread.start();
 
-        // Create as many chat windows as you wish for testing.
+        // Create as many chat windows as you wish for testing. e.g. new ChatWindow();
         SwingUtilities.invokeLater(() -> {
             new ChatWindow();
             new ChatWindow();
-            // e.g. new ChatWindow();
         });
     }
 }
