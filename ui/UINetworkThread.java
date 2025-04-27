@@ -24,6 +24,7 @@ public class UINetworkThread implements Runnable {
     }
 
     public void setThisUserName(String username) {
+        // Write to this socket's output stream. The server will handle this in "ClientHandler.run()" method.
         writer.println("SET_USERNAME:" + username);
     }
 
@@ -33,9 +34,7 @@ public class UINetworkThread implements Runnable {
         // If *you* sent the message, then display (You) in the chat instead of your name. e.g. (You):
         SwingUtilities.invokeLater(() -> chatBoxCallback.accept("(You): " + msg));
 
-        // Write to this socket's output stream. The server will handle this in
-        // the ClientHandler thread "ClientHandler.run()" method. Finally, the this.run() will
-        // execute the consumer callback, `messageToWindowCallback`, and null out the callback.
+        // Write to this socket's output stream. The server will handle this in "ClientHandler.run()" method.
         writer.println("MSG:" + msg);
     }
 
@@ -45,6 +44,7 @@ public class UINetworkThread implements Runnable {
         // If *you* sent the message, then display (You) in the chat instead of your name. E.g. (You):
         SwingUtilities.invokeLater(() -> chatBoxCallback.accept("(private message to: " + recipient + ") " + msg));
 
+        // Write to this socket's output stream. The server will handle this in "ClientHandler.run()" method.
         writer.println("PM:" + recipient + ":" + msg);
     }
 

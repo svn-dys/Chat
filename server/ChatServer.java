@@ -16,6 +16,7 @@ public final class ChatServer implements Runnable {
     private static final Logging LOG = Logging.serverLogger();
     private final Map<ClientHandler, String> clients = new HashMap<>();
     private final ServerConfig config = ServerConfigProvider.get();
+    private ClientHandler clientHandler;
     private ServerSocket serverSocket;
 
     public ChatServer() {
@@ -30,12 +31,17 @@ public final class ChatServer implements Runnable {
                 try {
                     // Wait for a new client to connect
                     Socket clientSocket = serverSocket.accept();
-                    ClientHandler clientHandler = new ClientHandler(clientSocket, this);
+                    clientHandler = new ClientHandler(clientSocket, this);
                     clients.put(clientHandler, "Anonymous");
-                    new Thread(clientHandler).start();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     LOG.ERROR("Failed to accept client connection: " + e.getMessage());
                     return;
+                } finally {
+                    try {
+                        new Thread(clientHandler).start();
+                    } catch (IllegalThreadStateException e) {
+                        LOG.ERROR("Failed to start client handler thread: " + e.getMessage());
+                    }
                 }
             }
         } catch (Exception e) {
