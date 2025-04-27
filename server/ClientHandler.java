@@ -1,6 +1,3 @@
-// This class, the client handler, acts as the Server's listener for messages
-// from the UI ChatWindow AND also sends messages to the UI ChatWindow.
-// A client represents a single open ChatWindow (see ui/ChatWindow for the ChatWindow implementation).
 package server;
 
 import core.Logging;
@@ -11,6 +8,11 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+/*
+    This class, the client handler, acts as the Server's listener for messages
+    from the UI ChatWindow AND also sends messages to the UI ChatWindow.
+    A client represents a single open ChatWindow (see ui/ChatWindow for the ChatWindow implementation).
+*/
 public class ClientHandler implements Runnable {
     private static final Logging LOG = Logging.serverLogger();
     private final Socket socket;

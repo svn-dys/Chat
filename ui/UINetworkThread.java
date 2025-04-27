@@ -1,9 +1,6 @@
-// This class that orchestrates the connection and messages
-// between the UI and the server. This thread is owned by ChatWindow.
 package ui;
 
 import core.ServerConfig;
-import core.Logging;
 import core.ServerConfigProvider;
 
 import javax.swing.*;
@@ -14,6 +11,10 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.function.Consumer;
 
+/*
+    This class that orchestrates the connection and messages
+    between the UI and the server. This thread is owned by ChatWindow.
+*/
 public class UINetworkThread implements Runnable {
     private final static ServerConfig config = ServerConfigProvider.get();
     private Consumer<String> chatBoxCallback;
@@ -31,7 +32,7 @@ public class UINetworkThread implements Runnable {
     public void sendMessageToServer(String msg) {
         if (msg == null || msg.isBlank() && chatBoxCallback != null) return;
 
-        // If *you* sent the message, then display (You) in the chat instead of your name. e.g. (You):
+        // If *you* sent the message, then display (You) in the chat instead of your name. E.g. (You):
         SwingUtilities.invokeLater(() -> chatBoxCallback.accept("(You): " + msg));
 
         // Write to this socket's output stream. The server will handle this in "ClientHandler.run()" method.

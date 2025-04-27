@@ -1,10 +1,11 @@
-// This class represents the UI. Its responsibility is to display data received from its chatNetWorkThread.
 package ui;
 
 import core.Logging;
+
 import javax.swing.*;
 import java.awt.*;
 
+// This class represents the UI. Its responsibility is to display data received from its chatNetWorkThread.
 public class ChatWindow extends JFrame {
     private final static Logging LOG = Logging.uiLogger();
     private final UINetworkThread UINetworkThread;

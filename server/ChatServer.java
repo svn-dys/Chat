@@ -1,5 +1,8 @@
-// This class listens on a port, accepts new socket connections, and spawns a chat handler for each client.
 package server;
+
+import core.Logging;
+import core.ServerConfig;
+import core.ServerConfigProvider;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -8,10 +11,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-import core.Logging;
-import core.ServerConfig;
-import core.ServerConfigProvider;
-
+// This class listens on a port, accepts new socket connections, and spawns a chat handler for each client.
 public final class ChatServer implements Runnable {
     private static final Logging LOG = Logging.serverLogger();
     private final Map<ClientHandler, String> clients = new HashMap<>();

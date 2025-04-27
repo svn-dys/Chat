@@ -1,7 +1,9 @@
-// This class represents a client inside the server. It holds information about the client as well as methods to manipulate the client.
-
 package server;
 
+/*
+    This class represents a client inside the server.
+    It holds information about the client as well as methods to manipulate the client.
+*/
 public class Client {
     private String name;
     private final ClientHandler handler;
