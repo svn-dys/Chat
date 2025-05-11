@@ -20,11 +20,6 @@ public final class ServerConfigProvider {
     }
 
     public static ServerConfig get() {
-        if (instance == null) {
-            new IllegalStateException("ServerConfig.get() called before initialization. " +
-                    "Did you forget to start the chat server?")
-                    .printStackTrace();
-        }
         return instance;
     }
 }
