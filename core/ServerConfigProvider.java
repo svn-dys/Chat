@@ -4,7 +4,7 @@ package core;
  * Provides a single ServerConfig instance. Cannot be reinstantiated after initialization.
  * The main idea behind a ServerConfigProvider is to have a single source of truth for the server configuration.
  * This way, the server configuration is highly decoupled from the rest of the application. Along with this,
- * the clients/{@link ui.UINetworkThread}UI-Network-Thread know of the server configuration
+ * the clients/UI-Network-Thread know of the server configuration
  * and can use it to connect to the server through its associated UI network sockets.
 */
 public final class ServerConfigProvider {
