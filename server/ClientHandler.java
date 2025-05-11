@@ -9,9 +9,9 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 /*
-    This class, the client handler, acts as the Server's listener for messages
-    from the UI ChatWindow AND also sends messages to the UI ChatWindow.
-    A client represents a single open ChatWindow (see ui/ChatWindow for the ChatWindow implementation).
+ * This class, the client handler, acts as the Server's listener for messages
+ * from the UI ChatWindow AND also sends messages to the UI ChatWindow.
+ * A client represents a single open ChatWindow (see ui/ChatWindow for the ChatWindow implementation).
 */
 public class ClientHandler implements Runnable {
     private static final Logging LOG = Logging.serverLogger();
@@ -22,18 +22,18 @@ public class ClientHandler implements Runnable {
 
     ClientHandler(Socket socket,
                   ChatServer server) throws IOException {
-        LOG.INFO("A client connected to server IP: " +
-                server.getInetAddress() + ":" + server.getPort() + " from client IP: " +
-                socket.getInetAddress() + ":" + socket.getPort() + ".");
+        LOG.INFO("Client " + socket.getRemoteSocketAddress() +
+                " connected to " + socket.getLocalAddress() +
+                ":" + socket.getLocalPort());
         this.socket = socket;
         this.server = server;
         this.writer = new PrintWriter(socket.getOutputStream(), true);
         this.client  = new Client("Anonymous", this);
     }
 
-    public void send(String msg) {
-        // Write to the output stream for `this` client
-        writer.println(msg);
+    // Write to the output stream for `this` client.
+    public void send(String message) {
+        writer.println(message);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class ClientHandler implements Runnable {
                     if (p.length == 3) {
                         String to   = p[1];
                         String text = p[2];
-                        server.broadcastMessagePrivate(to, client.getName() + " (private): " + text);
+                        server.broadcastMessagePrivate(to, client.getName() + " [private]: " + text);
                     }
                     continue;
                 }
@@ -69,9 +69,11 @@ public class ClientHandler implements Runnable {
                     continue;
                 }
 
-                // This can actually happen if someone connects to the server via telnet:
-                // or similar protocols
-                LOG.ERROR("Received invalid message from a client: " + messageFromClient);
+                /*
+                 * This can happen if someone connects to the server's IP via telnet,
+                 * similar protocols, or the web-browser.
+                */
+                LOG.ERROR("Unhandled chat command was read from client: " + messageFromClient);
             }
         } catch(IOException e) {
             throw new RuntimeException(e);

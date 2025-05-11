@@ -1,74 +1,92 @@
 package ui;
 
-import core.ServerConfig;
-import core.ServerConfigProvider;
+import core.Logging;
 
 import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.function.Consumer;
 
 /*
-    This class that orchestrates the connection and messages
-    between the UI and the server. This thread is owned by ChatWindow.
+ * This class orchestrates the connection and messages
+ * between the UI and the server. This thread is owned by ChatWindow.
 */
 public class UINetworkThread implements Runnable {
-    private final static ServerConfig config = ServerConfigProvider.get();
+    private static final Logging LOG = Logging.uiLogger();
+    private static final int CONNECT_TIMEOUT_MS = 2000;
+    private final InetSocketAddress serverAddress;
     private Consumer<String> chatBoxCallback;
     private PrintWriter writer;
+
+    public UINetworkThread(InetSocketAddress serverAddr) {
+        this.serverAddress = serverAddr;
+    }
 
     public void registerChatBoxListener(Consumer<String> chatBoxCallback) {
         this.chatBoxCallback = chatBoxCallback;
     }
 
     public void setThisUserName(String username) {
-        // Write to this socket's output stream. The server will handle this in "ClientHandler.run()" method.
-        writer.println("SET_USERNAME:" + username);
+        if (writer != null) {
+            writer.println("SET_USERNAME:" + username);
+        } else {
+            LOG.ERROR("`writer` was null.");
+            echoMessageToWindow("[System] Could not connect to server at "
+                    + serverAddress + ". Is the server running?");
+        }
     }
 
-    public void sendMessageToServer(String msg) {
-        if (msg == null || msg.isBlank() && chatBoxCallback != null) return;
+    public void sendMessageToServer(String message) {
+        if (message == null || message.isBlank()) return;
 
-        // If *you* sent the message, then display (You) in the chat instead of your name. E.g. (You):
-        SwingUtilities.invokeLater(() -> chatBoxCallback.accept("(You): " + msg));
-
-        // Write to this socket's output stream. The server will handle this in "ClientHandler.run()" method.
-        writer.println("MSG:" + msg);
+        if (writer != null) {
+            echoMessageToWindow("[You]: " + message);
+            writer.println("MSG:" + message);
+        } else {
+            LOG.ERROR("`writer` was null.");
+            echoMessageToWindow("[You]: " + message);
+        }
     }
 
-    public void sendPrivateMessage(String recipient, String msg) {
-        if (msg == null || msg.isBlank() && chatBoxCallback != null) return;
+    public void sendPrivateMessage(String recipient, String message) {
+        if (message == null || message.isBlank()) return;
 
         // If *you* sent the message, then display (You) in the chat instead of your name. E.g. (You):
-        SwingUtilities.invokeLater(() -> chatBoxCallback.accept("(private message to: " + recipient + ") " + msg));
+        echoMessageToWindow("[private message → " + recipient + "] " + message);
 
         // Write to this socket's output stream. The server will handle this in "ClientHandler.run()" method.
-        writer.println("PM:" + recipient + ":" + msg);
+        writer.println("PM:" + recipient + ":" + message);
     }
 
     @Override
     public void run() {
-        try (Socket socket = new Socket(config.inetAddress(), config.port())) {
-            PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.writer = writer;
-
-            String messageFromServer;
-            while ((messageFromServer = reader.readLine()) != null) {
-                String msg = messageFromServer;
-                // If there is a chatbox listening for messages from the server,
-                // invoke its callback.
-                SwingUtilities.invokeLater(() -> {
-                    if (chatBoxCallback != null) {
-                        chatBoxCallback.accept(msg);
-                    }
-                });
+        try (Socket socket = new Socket()) {
+            socket.connect(serverAddress, CONNECT_TIMEOUT_MS);
+            writer = new PrintWriter(socket.getOutputStream(), true);
+            try (BufferedReader reader =
+                         new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    final String message = line;
+                    SwingUtilities.invokeLater(() -> deliverToWindow(message));
+                }
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (IOException ex) {
+            SwingUtilities.invokeLater(() -> deliverToWindow("[System] Could not connect to server at "
+                + serverAddress + ". Is the server running?"));
         }
+    }
+
+    private void deliverToWindow(String message) {
+        if (chatBoxCallback != null)
+            chatBoxCallback.accept(message);
+    }
+
+    private void echoMessageToWindow(String message) {
+        SwingUtilities.invokeLater(() -> deliverToWindow(message));
     }
 }

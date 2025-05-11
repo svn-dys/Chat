@@ -1,16 +1,15 @@
 package server;
 
 /*
-    This class represents a client inside the server.
-    It holds information about the client as well as methods to manipulate the client.
+ * This class represents a client inside the server.
+ * It holds information about the client as well as the
+ * methods to manipulate the client.
 */
-public class Client {
+public final class Client {
     private String name;
-    private final ClientHandler handler;
 
     Client(String name, ClientHandler handler) {
         this.name = name;
-        this.handler = handler;
     }
 
     // Setters
@@ -24,9 +23,5 @@ public class Client {
             throw new IllegalStateException("Client name cannot be null or blank.");
         }
         return name;
-    }
-
-    public ClientHandler getHandler() {
-        return handler;
     }
 }
