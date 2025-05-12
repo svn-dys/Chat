@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 */
 public class UINetworkThread implements Runnable {
     private static final Logging LOG = Logging.uiLogger();
-    private static final int CONNECT_TIMEOUT_MS = 2000;
+    private static final int CONNECT_TIMEOUT_MS = 50;
     private final InetSocketAddress serverAddress;
     private Consumer<String> chatBoxCallback;
     private PrintWriter writer;
